@@ -1,36 +1,6 @@
-import requests
-
-
 from db.dbmanager import DBManager
+from utils import get_all_vacancies
 from config import DB_config
-
-
-companies = [
-    "1740",  # Яндекс
-    "87021",  # WB
-    "2180",  # ozon
-    "2748",
-    "907345",  # lukiol
-    "633069",
-    "3529",  # sber
-    "78638",  # tbank
-    "15478",  # vk
-    "668019",
-]
-
-
-def get_vacancies(company_name):
-    url = f"https://api.hh.ru/vacancies?employer_id={company_name}"
-    response = requests.get(url, params={"per_page": 10})
-    return response.json()
-
-
-def get_all_vacancies():
-    all_vacancies = []
-    for company in companies:
-        vacancies = get_vacancies(company)
-        all_vacancies.extend(vacancies["items"])
-    return all_vacancies
 
 
 if __name__ == "__main__":
@@ -41,13 +11,34 @@ if __name__ == "__main__":
         host=DB_config["host"],
         port=DB_config["port"],
     )
-    # db_manager.create_tables()
 
-    # vacancies = get_all_vacancies()
+    db_manager.create_tables()
+    vacancies = get_all_vacancies()
+    db_manager.insert_data(vacancies)
 
-    # db_manager.insert_data(vacancies)
-    print(db_manager.get_companies_and_vacancies_count())
-    # print(db_manager.get_all_vacancies())
-    # print(db_manager.get_avg_salary())
-    # print(db_manager.get_vacancies_with_higher_salary())
-    # print(db_manager.get_vacancies_with_keyword("Python"))
+    while True:
+        print("Menu:")
+        print("1. Вывод всех вакансий")
+        print("2. Вывод вакансий по ключевому слову")
+        print("3. Вывод компаний и количества вакансий")
+        print("4. Вывод средней зарплаты")
+        print("5. Вывод вакансий с зарплатой выше средней")
+        print("6. Выход")
+
+        choice = input("Введите номер пункта меню: ")
+
+        if choice == "1":
+            print(f">>> {db_manager.get_all_vacancies()}")
+        elif choice == "2":
+            keyword = input("Введите ключевое слово: ")
+            print(f">>> {db_manager.get_vacancies_with_keyword(keyword)}")
+        elif choice == "3":
+            print(f">>> {db_manager.get_companies_and_vacancies_count()}")
+        elif choice == "4":
+            print(f">>> {db_manager.get_avg_salary()}")
+        elif choice == "5":
+            print(f">>> {db_manager.get_vacancies_with_higher_salary()}")
+        elif choice == "6":
+            break
+        else:
+            print("Неверный ввод. Пожалуйста, выберите пункт меню.")

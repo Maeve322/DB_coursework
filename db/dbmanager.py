@@ -3,7 +3,19 @@ from psycopg2.extras import DictCursor
 
 
 class DBManager:
-    def __init__(self, db_name, user, password, host, port):
+    def __init__(
+        self, db_name: str, user: str, password: str, host: str, port: int
+    ):
+        """
+        Initializes a new instance of the DBManager class.
+
+        Args:
+            db_name (str): The name of the database.
+            user (str): The username to use for the connection.
+            password (str): The password to use for the connection.
+            host (str): The host address of the database server.
+            port (int): The port number to use for the connection.
+        """
         self.conn = psycopg2.connect(
             dbname=db_name,
             user=user,
@@ -15,6 +27,9 @@ class DBManager:
         self.cursor = self.conn.cursor()
 
     def create_tables(self):
+        """
+        Creates the necessary tables in the database if they do not exist.
+        """
         self.cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS companies (
@@ -33,7 +48,12 @@ class DBManager:
         )
         self.conn.commit()
 
-    def insert_data(self, vacancies):
+    def insert_data(self, vacancies: list[dict]):
+        """
+        Inserts data into the database.
+        Args:
+            vacancies (list[dict]): A list of vacancy dictionaries.
+        """
         company_names = set()
         for vacancy in vacancies:
             company_name = vacancy["employer"]["name"]
@@ -59,7 +79,14 @@ class DBManager:
             )
         self.conn.commit()
 
-    def get_companies_and_vacancies_count(self):
+    def get_companies_and_vacancies_count(self) -> list[dict]:
+        """
+        Returns a list of companies with their corresponding vacancy counts.
+
+        Returns:
+            list[dict]: A list of dictionaries containing company names
+                and vacancy counts.
+        """
         self.cursor.execute(
             """
             SELECT c.name, COUNT(v.id) AS vacancies_count
@@ -70,7 +97,13 @@ class DBManager:
         )
         return self.cursor.fetchall()
 
-    def get_all_vacancies(self):
+    def get_all_vacancies(self) -> list[dict]:
+        """
+        Returns a list of all vacancies.
+
+        Returns:
+            list[dict]: A list of dictionaries containing vacancy information.
+        """
         self.cursor.execute(
             """
             SELECT c.name AS company_name, v.name AS vacancy_name, v.salary, v.link
@@ -80,11 +113,24 @@ class DBManager:
         )
         return self.cursor.fetchall()
 
-    def get_avg_salary(self):
+    def get_avg_salary(self) -> float:
+        """
+        Returns the average salary of all vacancies.
+
+        Returns:
+            float: The average salary.
+        """
         self.cursor.execute("SELECT AVG(salary) FROM vacancies")
         return self.cursor.fetchone()[0]
 
-    def get_vacancies_with_higher_salary(self):
+    def get_vacancies_with_higher_salary(self) -> list[dict]:
+        """
+        Returns a list of vacancies with salaries higher
+            than the average salary.
+
+        Returns:
+            list[dict]: A list of dictionaries containing vacancy information.
+        """
         avg_salary = self.get_avg_salary()
         self.cursor.execute(
             """
@@ -97,7 +143,17 @@ class DBManager:
         )
         return self.cursor.fetchall()
 
-    def get_vacancies_with_keyword(self, keyword):
+    def get_vacancies_with_keyword(self, keyword) -> list[dict]:
+        """
+        Returns a list of vacancies with names containing
+            the specified keyword.
+
+        Args:
+            keyword (str): The keyword to search for.
+
+        Returns:
+            list[dict]: A list of dictionaries containing vacancy information.
+        """
         self.cursor.execute(
             """
             SELECT c.name AS company_name, v.name AS vacancy_name, v.salary, v.link

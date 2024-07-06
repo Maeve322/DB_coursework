@@ -1,7 +1,7 @@
 DB_config = {
-    "db_name": "",
-    "user": "",
-    "password": "",
-    "host": "",
-    "port": 5432,
+    "db_name": "postgres",
+    "user": "jasey",
+    "password": "jasey",
+    "host": "localhost",
+    "port": 5555,
 }
